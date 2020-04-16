@@ -7,9 +7,13 @@
     #define YY_NO_UNPUT
     #define YY_NO_INPUT
 
+    int flag=0;
     int line_num = 0;
     int comment_num = 0;
 %}
+
+%x C_COMMENT
+%x Cpp_COMMENT
 
 /* Define regular expression label */
 letter [a-zA-Z_]
@@ -18,16 +22,9 @@ id {letter}+({letter}|{digit})*
 inumber {digit}+
 fnumber ({digit}*\.{digit}+)
 ws [\t]+
-%START COMMENT
 
 /* Rules section */
 %%
-^[ \t]*"/*" { BEGIN COMMENT; printf("%-8s \t %s\n", yytext, "C Comment"); }
-
-<COMMENT>"*/"\n { BEGIN 0; comment_num++; printf("%-8s \t %s\n", yytext, "C Comment");}
-<COMMENT>"*/" { BEGIN 0; printf("%-8s \t %s\n", yytext, "C Comment");}
-<COMMENT>\n { comment_num++;  printf("%-8s \t %s\n", yytext, "C Comment");}
-<COMMENT>.\n { comment_num++;  printf("%-8s \t %s\n", yytext, "C Comment");}
 
 "+"         { printf("%-8s \t %s\n", yytext, "ADD"); }
 "-"         { printf("%-8s \t %s\n", yytext, "SUB"); }
@@ -78,6 +75,21 @@ ws [\t]+
 {ws}        {}
 
 
+
+"/*"            { if(flag==0){BEGIN(C_COMMENT); printf("/*");flag=1;}}
+<C_COMMENT>"*/" { printf("*/               C COMMENT\n");BEGIN(INITIAL); flag=0;}
+
+<C_COMMENT>\*\/\t*\n { printf("*/               C COMMENT\n");BEGIN(INITIAL);comment_num++; flag=0;}
+<C_COMMENT>. {printf("%s",yytext);}
+<C_COMMENT>\n {printf("\n                 C COMMENT\n");comment_num++;}
+
+"//"            {if(flag==0) {BEGIN(Cpp_COMMENT); printf("//");flag=1;}}
+<Cpp_COMMENT>. {printf("%s",yytext); }
+<Cpp_COMMENT>\n {printf("               C++ COMMENT\n");comment_num++;BEGIN(INITIAL);flag=0;}
+
+
+
+
 <<EOF>>     { line_num++; yyterminate(); }
 .           {;}
 
@@ -98,7 +110,7 @@ int main(int argc, char *argv[])
     }
     yylex();
     printf("\nFinish scanning,\n");
-    printf("total line: %d\n", line_num);
+    printf("total line: %d\n", line_num+comment_num);
     printf("comment line: %d\n", comment_num);
     fclose(yyin);
     return 0;
