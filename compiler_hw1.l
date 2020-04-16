@@ -77,15 +77,14 @@ ws [\t]+
 
 
 "/*"            { if(flag==0){BEGIN(C_COMMENT); printf("/*");flag=1;}}
-<C_COMMENT>"*/" { printf("*/               C COMMENT\n");BEGIN(INITIAL); flag=0;}
+<C_COMMENT>"*/" { printf("*/               C Comment\n");BEGIN(INITIAL); flag=0;}
 
-<C_COMMENT>\*\/\t*\n { printf("*/               C COMMENT\n");BEGIN(INITIAL);comment_num++; flag=0;}
+<C_COMMENT>\*\/\t*\n { printf("*/            C Comment\n");BEGIN(INITIAL);comment_num++; flag=0;}
 <C_COMMENT>. {printf("%s",yytext);}
-<C_COMMENT>\n {printf("\n                 C COMMENT\n");comment_num++;}
+<C_COMMENT>\n {printf("\n                 C Comment\n");comment_num++;}
 
 "//"            {if(flag==0) {BEGIN(Cpp_COMMENT); printf("//");flag=1;}}
-<Cpp_COMMENT>. {printf("%s",yytext); }
-<Cpp_COMMENT>\n {printf("               C++ COMMENT\n");comment_num++;BEGIN(INITIAL);flag=0;}
+<Cpp_COMMENT>.* { printf("%s        C++ Comment\n",yytext); comment_num++;BEGIN(INITIAL);flag=0;}
 
 
 
