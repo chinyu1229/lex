@@ -18,10 +18,16 @@ id {letter}+({letter}|{digit})*
 inumber {digit}+
 fnumber ({digit}*\.{digit}+)
 ws [\t]+
-comment "(*"([^*]\n|"*"+[^)])*"*"+")"
+%START COMMENT
 
 /* Rules section */
 %%
+^[ \t]*"/*" { BEGIN COMMENT; printf("%-8s \t %s\n", yytext, "C Comment"); }
+
+<COMMENT>"*/"\n { BEGIN 0; comment_num++; printf("%-8s \t %s\n", yytext, "C Comment");}
+<COMMENT>"*/" { BEGIN 0; printf("%-8s \t %s\n", yytext, "C Comment");}
+<COMMENT>\n { comment_num++;  printf("%-8s \t %s\n", yytext, "C Comment");}
+<COMMENT>.\n { comment_num++;  printf("%-8s \t %s\n", yytext, "C Comment");}
 
 "+"         { printf("%-8s \t %s\n", yytext, "ADD"); }
 "-"         { printf("%-8s \t %s\n", yytext, "SUB"); }
@@ -70,7 +76,7 @@ comment "(*"([^*]\n|"*"+[^)])*"*"+")"
 {fnumber}         { printf("%-8s \t %s\n", yytext, "FLOAT_LIT"); }
 {id}        { printf("%-8s \t %s\n", yytext, "IDENT"); }
 {ws}        {}
-{comment}   {}
+
 
 <<EOF>>     { line_num++; yyterminate(); }
 .           {;}
