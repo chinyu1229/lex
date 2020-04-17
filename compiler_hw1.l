@@ -6,15 +6,14 @@
 
     #define YY_NO_UNPUT
     #define YY_NO_INPUT
-
     int flag=0;
-    int line_num = 0;
     int comment_num = 0;
+    int keep=0;
 %}
 
 %x C_COMMENT
 %x Cpp_COMMENT
-
+%option yylineno
 /* Define regular expression label */
 letter [a-zA-Z_]
 digit [0-9]
@@ -68,28 +67,34 @@ ws [\t]+
 "true"         { printf("%-8s \t %s\n", yytext, "TRUE"); }
 "false"         { printf("%-8s \t %s\n", yytext, "FALSE"); }
 "var"         { printf("%-8s \t %s\n", yytext, "VAR"); }
-"\n"         {printf("%-8s \t \n","                 NEWLINE"); line_num++;}
+";"         { printf("%-8s \t %s\n", yytext, "SEMICOLON"); }
 {inumber}         { printf("%-8s \t %s\n", yytext, "INT_LIT"); }
 {fnumber}         { printf("%-8s \t %s\n", yytext, "FLOAT_LIT"); }
 {id}        { printf("%-8s \t %s\n", yytext, "IDENT"); }
 {ws}        {}
 
 
+"\n"         {printf("%-8s \t \n","                 NEWLINE");     
+
+    if(keep>0){
+        comment_num++;
+        keep=0;
+    }
+}
+
 
 "/*"            { if(flag==0){BEGIN(C_COMMENT); printf("/*");flag=1;}}
-<C_COMMENT>"*/" { printf("*/               C Comment\n");BEGIN(INITIAL); flag=0;}
-
-<C_COMMENT>\*\/\t*\n { printf("*/            C Comment\n");BEGIN(INITIAL);comment_num++; flag=0;}
+<C_COMMENT>"*/" { printf("*/               C Comment\n");BEGIN(INITIAL); flag=0;keep=1;}
 <C_COMMENT>. {printf("%s",yytext);}
-<C_COMMENT>\n {printf("\n                 C Comment\n");comment_num++;}
+<C_COMMENT>\n {printf("              \n                 C Comment\n");comment_num++;}
 
 "//"            {if(flag==0) {BEGIN(Cpp_COMMENT); printf("//");flag=1;}}
-<Cpp_COMMENT>.* { printf("%s        C++ Comment\n",yytext); comment_num++;BEGIN(INITIAL);flag=0;}
+<Cpp_COMMENT>.* {printf("%s        C++ Comment\n",yytext); BEGIN(INITIAL);flag=0;keep=1;}
 
 
 
 
-<<EOF>>     { line_num++; yyterminate(); }
+<<EOF>>     {  yyterminate(); }
 .           {;}
 
 %%
@@ -109,7 +114,7 @@ int main(int argc, char *argv[])
     }
     yylex();
     printf("\nFinish scanning,\n");
-    printf("total line: %d\n", line_num+comment_num);
+    printf("total line: %d\n", yylineno);
     printf("comment line: %d\n", comment_num);
     fclose(yyin);
     return 0;
