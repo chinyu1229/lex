@@ -1007,9 +1007,9 @@ YY_RULE_SETUP
 	      char*buf;
 	      buf=strdup(yytext);
 	      buf[strlen(buf)-1]='\0';	
-	      printf("\"%-8s \t QUOTA\n","");
+	      printf("\"%-8s\t QUOTA\n","");
 	      printf("%s%-8s \t STRING\n","",buf+1);
-              printf("\"%-8s \t QUOTA\n","");
+              printf("\"%-8s\t QUOTA\n","");
 	      free(buf);
 	    }
 	YY_BREAK

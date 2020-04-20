@@ -12,9 +12,9 @@ var      	 VAR
 __z      	 IDENT
 string   	 STRING
 =        	 ASSIGN
-"         	 QUOTA
+"        	 QUOTA
 OuO      	 STRING
-"         	 QUOTA
+"        	 QUOTA
          	 NEWLINE
 var      	 VAR
 weight   	 IDENT
