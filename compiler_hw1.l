@@ -40,7 +40,7 @@ ws [\t]+
 "!="         { printf("%-8s \t %s\n", yytext, "NEQ"); }
 "="         { printf("%-8s \t %s\n", yytext, "ASSIGN"); }
 "+="         { printf("%-8s \t %s\n", yytext, "ADD_ASSIGN"); }
-"-+"         { printf("%-8s \t %s\n", yytext, "SUB_ASSIGN"); }
+"-="         { printf("%-8s \t %s\n", yytext, "SUB_ASSIGN"); }
 "*="         { printf("%-8s \t %s\n", yytext, "MUL_ASSIGN"); }
 "/="         { printf("%-8s \t %s\n", yytext, "QUO_ASSIGN"); }
 "%="         { printf("%-8s \t %s\n", yytext, "REM_ASSIGN"); }
@@ -74,7 +74,7 @@ ws [\t]+
 {ws}        {}
 
 
-"\n"         {printf("%-8s \t \n","                 NEWLINE");     
+"\n"         {printf("%-8s \t NEWLINE\n","");     
 
     if(keep>0){
         comment_num++;
@@ -84,17 +84,17 @@ ws [\t]+
 
 
 "/*"            { if(flag==0){BEGIN(C_COMMENT); printf("/*");flag=1;}}
-<C_COMMENT>"*/" { printf("*/               C Comment\n");BEGIN(INITIAL); flag=0;keep=1;}
+<C_COMMENT>"*/" { printf("*/%-7s\t C Comment\n","");BEGIN(INITIAL); flag=0;keep=1;}
 <C_COMMENT>. {printf("%s",yytext);}
-<C_COMMENT>\n {printf("              \n                 C Comment\n");comment_num++;}
+<C_COMMENT>\n {printf("\n%-7s \t C Comment\n","");comment_num++;}
 
 "//"            {if(flag==0) {BEGIN(Cpp_COMMENT); printf("//");flag=1;}}
-<Cpp_COMMENT>.* {printf("%s        C++ Comment\n",yytext); BEGIN(INITIAL);flag=0;keep=1;}
+<Cpp_COMMENT>.* {printf("%-7s \t C++ Comment\n",yytext); BEGIN(INITIAL);flag=0;keep=1;}
 
 
 
 
-<<EOF>>     {  yyterminate(); }
+<<EOF>>     { if(keep>0)comment_num++; yyterminate(); }
 .           {;}
 
 %%
