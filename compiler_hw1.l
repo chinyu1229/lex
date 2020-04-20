@@ -54,7 +54,15 @@ ws [\t]+
 "{"         { printf("%-8s \t %s\n", yytext, "LBRACE"); }
 "}"         { printf("%-8s \t %s\n", yytext, "RBRACE"); }
 ","         { printf("%-8s \t %s\n", yytext, "COMMA"); }
-"\""         { printf("%-8s \t %s\n", yytext, "QUOTA"); }
+\".*\"      {
+	      char*buf;
+	      buf=strdup(yytext);
+	      buf[strlen(buf)-1]='\0';	
+	      printf("\"%-8s \t QUOTA\n","");
+	      printf("%s%-8s \t STRING\n","",buf+1);
+              printf("\"%-8s \t QUOTA\n","");
+	      free(buf);
+	    }
 "print"         { printf("%-8s \t %s\n", yytext, "PRINT"); }
 "println"         { printf("%-8s \t %s\n", yytext, "PRINTLN"); }
 "if"         { printf("%-8s \t %s\n", yytext, "IF"); }
